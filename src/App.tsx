@@ -1,51 +1,85 @@
-import { Checkbox, Divider } from 'antd';
 import 'antd/dist/antd.css';
-import { CheckboxChangeEvent } from 'antd/lib/checkbox';
+import {
+  createStore,
+  StateMachineProvider,
+  useStateMachine,
+} from 'little-state-machine';
+import cacheSelect from 'machine/cache-select';
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import './App.css';
+import Checkbox from './components/Checkbox';
 
-const CheckboxGroup = Checkbox.Group;
+let renderCount = 0;
 
 const plainOptions = ['Apple', 'Pear', 'Orange'];
-const defaultCheckedList = ['Apple', 'Orange'];
 
-const App = () => {
-  const { register } = useForm();
+createStore({
+  selected: [],
+});
 
-  const [checkedList, setCheckedList] = React.useState(defaultCheckedList);
-  const [indeterminate, setIndeterminate] = React.useState(true);
-  const [checkAll, setCheckAll] = React.useState(false);
+const currentPage = 1;
 
-  const onChange = (list: any) => {
-    setCheckedList(list);
-    setIndeterminate(!!list.length && list.length < plainOptions.length);
-    setCheckAll(list.length === plainOptions.length);
+const YourComponent = () => {
+  const { state, actions } = useStateMachine({
+    cacheSelect,
+    clearCache: (state, payload) => {
+      return {
+        selected: [],
+      };
+    },
+  });
+
+  const { watch, register, getValues } = useForm();
+  const watchAllFields = watch();
+  const getSelected = getValues();
+
+  console.log('watchAllFields:', watchAllFields);
+  console.log('getSelected:', getSelected);
+
+  console.log('Global Cache State:', state);
+
+  const handleCache = (id: string) => {
+    try {
+      actions.cacheSelect({ page: 1, rowId: id });
+    } catch (error) {
+      console.log('Error:', error);
+    }
   };
 
-  const onCheckAllChange = (e: CheckboxChangeEvent) => {
-    setCheckedList(e.target.checked ? plainOptions : []);
-    setIndeterminate(false);
-    setCheckAll(e.target.checked);
-  };
+  const selectedItem = state.selected.find((x) => x.page === currentPage);
 
   return (
     <>
-      <Checkbox
-        indeterminate={indeterminate}
-        onChange={onCheckAllChange}
-        checked={checkAll}
-        ref={register}
+      <div
+        onClick={() => {
+          actions.clearCache([]);
+        }}
       >
-        Check all
-      </Checkbox>
-      <Divider />
-      <CheckboxGroup
-        options={plainOptions}
-        value={checkedList}
-        onChange={onChange}
-      />
+        Reset Cache
+      </div>
+
+      {plainOptions.map((e) => (
+        <label key={e} style={{ marginRight: 10 }}>
+          <Checkbox
+            name={e}
+            checked={!!selectedItem?.rowIds.find((x: string) => x === e)}
+            ref={register}
+            saveCache={handleCache}
+          />
+          {e}
+        </label>
+      ))}
     </>
+  );
+};
+
+const App = () => {
+  renderCount++;
+  return (
+    <StateMachineProvider>
+      <div>Render Count: {renderCount}</div>
+      <YourComponent />
+    </StateMachineProvider>
   );
 };
 
