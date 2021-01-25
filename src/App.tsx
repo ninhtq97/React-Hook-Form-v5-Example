@@ -1,3 +1,4 @@
+import { Button } from 'antd';
 import 'antd/dist/antd.css';
 import {
   createStore,
@@ -50,14 +51,6 @@ const YourComponent = () => {
 
   return (
     <>
-      <div
-        onClick={() => {
-          actions.clearCache([]);
-        }}
-      >
-        Reset Cache
-      </div>
-
       {plainOptions.map((e) => (
         <label key={e} style={{ marginRight: 10 }}>
           <Checkbox
@@ -69,6 +62,14 @@ const YourComponent = () => {
           {e}
         </label>
       ))}
+
+      <Button
+        onClick={() => {
+          actions.clearCache([]);
+        }}
+      >
+        Reset Cache
+      </Button>
     </>
   );
 };
