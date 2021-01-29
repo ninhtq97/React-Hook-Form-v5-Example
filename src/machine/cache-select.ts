@@ -1,10 +1,11 @@
+import { size } from 'App';
 import { GlobalState } from 'little-state-machine';
 
 export const cacheSelect = (
   state: GlobalState,
-  payload: { page: number; rowId: string }
+  payload: { page: number; size: number; rowId: string }
 ) => {
-  // console.log('Payload:', payload);
+  console.log('Payload:', payload);
 
   let existsPage = state.selected.find((x) => x.page === payload.page);
 
@@ -27,6 +28,8 @@ export const cacheSelect = (
     } else {
       existsPage.rowIds.push(payload.rowId);
     }
+
+    existsPage.selectAll = existsPage.rowIds.length === size;
 
     selected = [
       ...state.selected.slice(0, pageIndex),

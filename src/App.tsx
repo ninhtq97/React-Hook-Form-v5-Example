@@ -13,6 +13,8 @@ import { Controller, useForm } from 'react-hook-form';
 
 let renderCount = 0;
 
+export const size = 20;
+
 createStore({
   selected: [],
 });
@@ -90,7 +92,7 @@ const YourComponent: FC<{}> = () => {
       itemCount: 0,
       page: 1,
       pageCount: 0,
-      take: 10,
+      take: size,
     },
   });
   const selectedItem = state.selected.find((x) => x.page === tasks.meta.page);
@@ -112,12 +114,16 @@ const YourComponent: FC<{}> = () => {
   }, []);
 
   useEffect(() => {
-    getTasks();
+    getTasks({ take: size });
   }, [getTasks]);
 
   const handleCache = (id: string) => {
     try {
-      actions.cacheSelect({ page: tasks.meta.page, rowId: id });
+      actions.cacheSelect({
+        page: tasks.meta.page,
+        size: tasks.data.length,
+        rowId: id,
+      });
     } catch (error) {
       console.log('Error:', error);
     }
