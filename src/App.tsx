@@ -79,17 +79,21 @@ const YourComponent: FC<{}> = () => {
 
   console.log('Global Cache State:', state);
 
-  const [tasks, setTasks] = useState<ITaskResponse[]>([]);
-  const [metadata, setMetadata] = useState<IMetadata>({
-    hasNextPage: false,
-    hasPreviousPage: false,
-    itemCount: 0,
-    page: 1,
-    pageCount: 0,
-    take: 10,
+  const [tasks, setTasks] = useState<{
+    data: ITaskResponse[];
+    meta: IMetadata;
+  }>({
+    data: [],
+    meta: {
+      hasNextPage: false,
+      hasPreviousPage: false,
+      itemCount: 0,
+      page: 1,
+      pageCount: 0,
+      take: 10,
+    },
   });
-  const selectedItem = state.selected.find((x) => x.page === metadata.page);
-  console.log('tasks:', tasks);
+  const selectedItem = state.selected.find((x) => x.page === tasks.meta.page);
   console.log('selectedItem:', selectedItem);
 
   const getTasks = useCallback(async (newQueryAttr?: Record<string, any>) => {
@@ -101,10 +105,7 @@ const YourComponent: FC<{}> = () => {
         },
       });
 
-      const { data, meta } = res.data;
-
-      setMetadata(meta);
-      setTasks(data);
+      setTasks(res.data);
     } catch (error) {
       console.log('Error:', error);
     }
@@ -116,7 +117,7 @@ const YourComponent: FC<{}> = () => {
 
   const handleCache = (id: string) => {
     try {
-      actions.cacheSelect({ page: metadata.page, rowId: id });
+      actions.cacheSelect({ page: tasks.meta.page, rowId: id });
     } catch (error) {
       console.log('Error:', error);
     }
@@ -124,8 +125,8 @@ const YourComponent: FC<{}> = () => {
 
   const handleCachePage = () => {
     try {
-      const rowIds = tasks.map((e) => e.id);
-      actions.cacheAllPage({ page: metadata.page, rowIds });
+      const rowIds = tasks.data.map((e) => e.id);
+      actions.cacheAllPage({ page: tasks.meta.page, rowIds });
     } catch (error) {}
   };
 
@@ -149,7 +150,7 @@ const YourComponent: FC<{}> = () => {
         defaultChecked={selectedItem?.selectAll}
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
           const checked = e.target.checked;
-          tasks
+          tasks.data
             .map((e) => e.id)
             .forEach((element) => {
               setValue(element, checked);
@@ -157,53 +158,57 @@ const YourComponent: FC<{}> = () => {
           handleCachePage();
         }}
       />
-      {tasks.map((e) => (
-        /* Is is controller on version 5 */
-        // <Controller
-        //   key={e.id}
-        //   name={e.id}
-        //   label={e.name}
-        //   control={control}
-        //   checked={!!selectedItem?.rowIds.find((x: string) => x === e.id)}
-        //   defaultValue={!!selectedItem?.rowIds.find((x: string) => x === e.id)}
-        //   saveCache={handleCache}
-        //   as={<Checkbox />}
-        // />
 
+      {tasks.data.map((e) => (
+        /* Controller on version 5 */
         <Controller
           key={e.id}
           name={e.id}
+          label={e.name}
           control={control}
-          defaultValue={selectedItem?.rowIds.includes(e.id) || false}
-          render={(props) => {
-            return (
-              <Checkbox
-                name={props.name}
-                defaultChecked={selectedItem?.rowIds.includes(e.id)}
-                label={e.name}
-                ref={props.ref}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  const checked = e.target.checked;
-
-                  props.onChange(checked);
-                  handleCache(props.name);
-                }}
-              />
-            );
-          }}
+          defaultChecked={
+            !!selectedItem?.rowIds.find((x: string) => x === e.id)
+          }
+          defaultValue={!!selectedItem?.rowIds.find((x: string) => x === e.id)}
+          onChange={() => handleCache(e.id)}
+          as={<Checkbox />}
         />
+
+        /* Controller on version 6 */
+        // <Controller
+        //   key={e.id}
+        //   name={e.id}
+        //   control={control}
+        //   defaultValue={selectedItem?.rowIds.includes(e.id) || false}
+        //   render={(props) => {
+        //     return (
+        //       <Checkbox
+        //         name={props.name}
+        //         defaultChecked={selectedItem?.rowIds.includes(e.id)}
+        //         label={e.name}
+        //         ref={props.ref}
+        //         onChange={(e: ChangeEvent<HTMLInputElement>) => {
+        //           const checked = e.target.checked;
+
+        //           props.onChange(checked);
+        //           handleCache(props.name);
+        //         }}
+        //       />
+        //     );
+        //   }}
+        // />
       ))}
 
       <Button onClick={handleSubmit(onSubmit)}>Submit Form</Button>
 
       <div style={{ display: 'flex', alignItems: 'center', margin: '5px 0' }}>
-        <Button onClick={() => getTasks({ page: metadata.page - 1 })}>
+        <Button onClick={() => getTasks({ page: tasks.meta.page - 1 })}>
           Previous Page
         </Button>
         <Button disabled style={{ margin: '0 5px' }}>
-          {metadata.page}
+          {tasks.meta.page}
         </Button>
-        <Button onClick={() => getTasks({ page: metadata.page + 1 })}>
+        <Button onClick={() => getTasks({ page: tasks.meta.page + 1 })}>
           Next Page
         </Button>
       </div>
@@ -225,37 +230,9 @@ const YourComponent: FC<{}> = () => {
 // }
 
 const App = () => {
-  // const [data, setData] = useState<any>([]);
-  // const [currentPage, setCurrentPage] = useState(1);
-
-  // const getData = (page: number) => {
-  //   setData([
-  //     ...data,
-  //     ...[
-  //       {
-  //         id: makeString(5),
-  //         name: makeString(10),
-  //       },
-  //     ],
-  //   ]);
-  //   setCurrentPage(page);
-  // };
-
   return (
     <StateMachineProvider>
       <YourComponent />
-
-      {/* {data.map((e: any) => (
-        <div key={e.id}>{e.name}</div>
-      ))}
-
-      <div style={{ display: 'flex', alignItems: 'center', margin: '5px 0' }}>
-        <Button onClick={() => getData(currentPage - 1)}>Previous Page</Button>
-        <Button disabled style={{ margin: '0 5px' }}>
-          {currentPage}
-        </Button>
-        <Button onClick={() => getData(currentPage + 1)}>Next Page</Button>
-      </div> */}
     </StateMachineProvider>
   );
 };

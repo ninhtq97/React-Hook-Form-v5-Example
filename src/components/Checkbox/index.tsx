@@ -12,8 +12,6 @@ const Checkbox: FC<ComponentProps<typeof HiddenCheckbox>> = React.forwardRef(
     { className, label, defaultChecked = false, ...restProps },
     forwardedRef
   ) => {
-    console.log('defaultChecked:', defaultChecked);
-
     return (
       <CheckboxLabel>
         <CheckboxContainer className={className}>
