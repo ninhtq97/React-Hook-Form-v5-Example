@@ -13,7 +13,7 @@ import { Controller, useForm } from 'react-hook-form';
 
 let renderCount = 0;
 
-export const size = 20;
+export const size = 5;
 
 createStore({
   selected: [],
@@ -100,8 +100,10 @@ const YourComponent: FC<{}> = () => {
 
   const getTasks = useCallback(async (newQueryAttr?: Record<string, any>) => {
     try {
+      const params = { take: size };
+
       const res = await axios.get(`http://183.81.32.36:8000/task`, {
-        params: newQueryAttr,
+        params: { ...params, ...newQueryAttr },
         headers: {
           Authorization: `Bearer ${localStorage.getItem('authToken')}`,
         },
