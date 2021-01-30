@@ -181,30 +181,6 @@ const YourComponent: FC<{}> = () => {
           onChange={() => handleCache(e.id)}
           as={<Checkbox />}
         />
-
-        /* Controller on version 6 */
-        // <Controller
-        //   key={e.id}
-        //   name={e.id}
-        //   control={control}
-        //   defaultValue={selectedItem?.rowIds.includes(e.id) || false}
-        //   render={(props) => {
-        //     return (
-        //       <Checkbox
-        //         name={props.name}
-        //         defaultChecked={selectedItem?.rowIds.includes(e.id)}
-        //         label={e.name}
-        //         ref={props.ref}
-        //         onChange={(e: ChangeEvent<HTMLInputElement>) => {
-        //           const checked = e.target.checked;
-
-        //           props.onChange(checked);
-        //           handleCache(props.name);
-        //         }}
-        //       />
-        //     );
-        //   }}
-        // />
       ))}
 
       <Button onClick={handleSubmit(onSubmit)}>Submit Form</Button>
@@ -225,17 +201,6 @@ const YourComponent: FC<{}> = () => {
     </>
   );
 };
-
-// function makeString(length: number) {
-//   var result = '';
-//   var characters =
-//     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-//   var charactersLength = characters.length;
-//   for (var i = 0; i < length; i++) {
-//     result += characters.charAt(Math.floor(Math.random() * charactersLength));
-//   }
-//   return result;
-// }
 
 const App = () => {
   return (
